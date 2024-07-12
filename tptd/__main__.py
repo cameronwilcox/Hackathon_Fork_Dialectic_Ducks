@@ -75,15 +75,18 @@ if __name__ == '__main__':
     for twr in TWR_POS:
         try:
             curr_twr = Turret(twr[0], twr[1] + PLAYER_BASE.rect.centerx, twr[2] + PLAYER_BASE.rect.centery, twr[3])
-            if curr_twr.rect.collidelist(path_rects) >= 0:
-                print(f'Cannot spawn tower at position: {curr_twr.rect.center}')
+            if (curr_twr.rect.collidelist(path_rects) >= 0) or bool(set(pygame.sprite.spritecollide(curr_twr, Turret.sp_grp, False) ) - {curr_twr}): # Likely that `curr_twr` collides with itself :/
+                print(f'Cannot spawn {twr[0]} at position: {twr[1:3]}')
                 curr_twr.kill()
             else: num_twr += 1
             #End-if
-        except: print(f'Unable to spawn {twr[0]} at position {twr[1:3]}')
+        except Exception as e:
+            print(f'Error spawning {twr[0]} at position {twr[1:3]}:\n{e}')
+            if hasattr(curr_twr, 'kill'): curr_twr.kill()
         # End-try
     #End-for
-    game_over = False
+    game_over = num_twr == 0
+    if game_over: print('Aborting: unable to spawn any towers')
     
     pygame.time.set_timer(pygame.USEREVENT, int(MSEC_PER_UPDATE) )
     while not game_over:
