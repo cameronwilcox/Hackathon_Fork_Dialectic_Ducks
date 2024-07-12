@@ -2,6 +2,8 @@
 from pathlib    import Path
 from typing     import Tuple
 
+import math
+
 THIS_FOLDER = Path(__file__).resolve().parent
 TWR_POS = []
 with open(THIS_FOLDER / 'twr.csv', 'r') as twr_h:
@@ -16,45 +18,58 @@ with open(THIS_FOLDER / 'twr.csv', 'r') as twr_h:
 def twr_func(coord, tag : str, LoT : list, fire : bool, current_dir : float, target_dir : float) -> Tuple[float, bool, bool]:
     '''
     Add in your turret logic here
-    
+
     Notes:
     - "2D-Vector" == pygame.math.Vector2d using pixels
     - angle == float in degrees
-    
+
     PARAMETERS
     ----------
     coord : 2D-Vector
         Location of the subject tower relative to the home base
-    
+
     tag : str
         An identifier defined by you
-    
+
     LoT : list
         "List of Targets", each entry in this list has the following structure
         - Target Type : str
         - Target Position : 2D-Vector
         - Target Velocity : 2D-Vector
-    
+
     fire : bool
         Indicates whether or not the next round will be fired when chambered
-    
+
     current_dir : angle
         Current bearing of the gun
-    
+
     target_dir : angle
         Target bearing of the gun
-    
+
     RETURNS
     -------
     target_dir
         As defined in `PARAMETERS`
-    
+
     fire
         As defined in `PARAMETERS`
-    
+
     target_dir_is_radians : bool
         Indicates if the output target_dir is in radians
-    
+
     '''
-    return (coord.as_polar()[1], True, False)
+    print(len(LoT))
+
+    if len(LoT) > 5:
+        priroity_target = LoT[5]
+    else:
+        print("exiting")
+        return (0, False, False)
+    print(priroity_target)
+    delta_y = priroity_target[1][0] - coord[0]
+    delta_x = priroity_target[1][1] - coord[1]
+    angle = math.atan(delta_y/delta_x)
+    # angle = coord.angle_to(priroity_target[1])
+    # print(angle)
+    return (angle, True, True)
 #End-def
