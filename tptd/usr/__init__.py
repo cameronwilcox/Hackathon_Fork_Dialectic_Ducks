@@ -14,7 +14,7 @@ with open(THIS_FOLDER / 'twr.csv', 'r') as twr_h:
     #End-for
 #End-with
 # <-- DO NOT EDIT
-
+from pygame.math import Vector2
 def twr_func(coord, tag : str, LoT : list, fire : bool, current_dir : float, target_dir : float) -> Tuple[float, bool, bool]:
     '''
     Add in your turret logic here
@@ -58,17 +58,28 @@ def twr_func(coord, tag : str, LoT : list, fire : bool, current_dir : float, tar
         Indicates if the output target_dir is in radians
 
     '''
-    if len(LoT) > 1:
+    # Wait to start shooting until an enemy spawns (if 1 turret)
+    if len(LoT) > 3:
         priority_target = LoT[1]
     else:
         print("start")
-        return (-135, False, False)
-    print(priority_target[2])
-    delta_x = coord[0] - (priority_target[1][0] + priority_target[2][0])
-    delta_y = coord[1] - (priority_target[1][1] + priority_target[2][1])
-    if target_dir == 90 and current_dir == 90:
+        return (0, False, False)
+    
+    # Target variables
+    target_type = priority_target[0]
+    target_pos = Vector2(priority_target[1][0], priority_target[1][1])
+    target_vel = Vector2(priority_target[2][0], priority_target[2][1])
+
+    # Turret variables
+    turret_pos = Vector2(coord[0], coord[1])
+
+    delta_x = turret_pos.x - (target_pos.x + (target_vel.x))
+    delta_y = turret_pos.y - (target_pos.y + (target_vel.y))
+
+    # Kind of dumb, but works? - Not really :(
+    if target_pos == turret_pos.x and current_dir == 90:
         return (90, True, False)
-    elif target_dir == -90 and current_dir == -90:
+    elif target_dir == turret_pos.x and current_dir == -90:
         return (-90, True, False)
     if priority_target[1][0] < coord[0]:
         angle = math.degrees(math.atan(delta_y/delta_x)) + 180
