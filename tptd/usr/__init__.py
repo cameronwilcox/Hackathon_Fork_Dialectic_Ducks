@@ -64,7 +64,7 @@ def twr_func(coord, tag : str, LoT : list, fire : bool, current_dir : float, tar
     else:
         print("start")
         return (0, False, False)
-    
+
     # Target variables
     target_type = priority_target[0]
     target_pos = Vector2(priority_target[1][0], priority_target[1][1])
@@ -77,17 +77,14 @@ def twr_func(coord, tag : str, LoT : list, fire : bool, current_dir : float, tar
     delta_y = turret_pos.y - (target_pos.y + (target_vel.y))
 
     # Kind of dumb, but works? - Not really :(
-    if target_pos == turret_pos.x and current_dir == 90:
-        return (90, True, False)
-    elif target_dir == turret_pos.x and current_dir == -90:
-        return (-90, True, False)
-    if priority_target[1][0] < coord[0]:
+    print(f"delta_x {delta_x}, delta_y{delta_y}")
+
+    if delta_x > 0:
         angle = math.degrees(math.atan(delta_y/delta_x)) + 180
-    elif priority_target[1][0] == coord[0]:
-        if priority_target[1][1] > coord[1]:
-            return (90, False, False)
-        else:
-            return (-90, False, False)
+    elif delta_x == 0 and delta_y > 0:
+        return (90, True, False)
+    elif delta_x == 0 and delta_y < 0:
+        return (-90, True, False)
     else:
         angle = math.degrees(math.atan(delta_y/delta_x))
 
