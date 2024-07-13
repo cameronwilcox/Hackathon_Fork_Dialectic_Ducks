@@ -145,7 +145,7 @@ if __name__ == '__main__':
             final_score_msg = f'''
             Towers Deployed:        {num_twr}
             Enemies neutralized:    {Enemy.killed}
-            Enemies survided:       {PLAYER_BASE.damage}
+            Enemies survived:       {PLAYER_BASE.damage}
             Max Overutilization:    {oukd*100}%
             --------------------------------
             FINAL SCORE:            {tot_pkd}
