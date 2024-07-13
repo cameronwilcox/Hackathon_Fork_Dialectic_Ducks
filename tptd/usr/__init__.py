@@ -58,18 +58,28 @@ def twr_func(coord, tag : str, LoT : list, fire : bool, current_dir : float, tar
         Indicates if the output target_dir is in radians
 
     '''
-    print(len(LoT))
-
-    if len(LoT) > 5:
-        priroity_target = LoT[5]
+    if len(LoT) > 1:
+        priority_target = LoT[1]
     else:
-        print("exiting")
-        return (0, False, False)
-    print(priroity_target)
-    delta_y = priroity_target[1][0] - coord[0]
-    delta_x = priroity_target[1][1] - coord[1]
-    angle = math.atan(delta_y/delta_x)
-    # angle = coord.angle_to(priroity_target[1])
+        print("start")
+        return (-135, False, False)
+    print(priority_target)
+    delta_x = coord[0] - priority_target[1][0]
+    delta_y = coord[1] - priority_target[1][1]
+    if priority_target[1][0] < coord[0]:
+        angle = math.degrees(math.atan(delta_y/delta_x)) + 180
+    elif priority_target[1][0] == coord[0]:
+        if priority_target[1][1] > coord[1]:
+            return (270, False, False)
+        else:
+            return (90, False, False)
+    else:
+        angle = math.degrees(math.atan(delta_y/delta_x))
+    # angle = coord.angle_to(priority_target[1])
+    # if priority_target[1][0] < coord[0]:
+    #      angle = angle + 180
+
+    # angle = coord.angle_to(priority_target[1])
     # print(angle)
-    return (angle, True, True)
+    return (angle, True, False)
 #End-def
