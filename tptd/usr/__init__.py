@@ -14,6 +14,10 @@ with open(THIS_FOLDER / 'twr.csv', 'r') as twr_h:
     #End-for
 #End-with
 # <-- DO NOT EDIT
+
+
+min_range = 999
+max_range = -999
 from pygame.math import Vector2
 def twr_func(coord, tag : str, LoT : list, fire : bool, current_dir : float, target_dir : float) -> Tuple[float, bool, bool]:
     '''
@@ -73,10 +77,14 @@ def twr_func(coord, tag : str, LoT : list, fire : bool, current_dir : float, tar
     # Turret variables
     turret_pos = Vector2(coord[0], coord[1])
 
-    delta_x = turret_pos.x - (target_pos.x + (target_vel.x))
-    delta_y = turret_pos.y - (target_pos.y + (target_vel.y))
+    target_range = (((target_pos[0] - turret_pos[0]) ** 2) + ((target_pos[1] - turret_pos[1]) **2)) ** .5
 
-    # Kind of dumb, but works? - Not really :(
+    k = .30 + target_range/275
+    print(f"k:{k}")
+
+    delta_x = turret_pos.x - (target_pos.x + k*(target_vel.x))
+    delta_y = turret_pos.y - (target_pos.y + k*(target_vel.y))
+
     print(f"delta_x {delta_x}, delta_y{delta_y}")
 
     if delta_x > 0:
