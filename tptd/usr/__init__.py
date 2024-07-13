@@ -85,7 +85,7 @@ def twr_func(coord, tag : str, LoT : list, fire : bool, current_dir : float, tar
     turret_pos = Vector2(coord[0], coord[1])
     bullet_speed = 45 # Hard coded from Howard Walowitz Turret
     rot_speed = 55
-    # target_range = (((target_pos[0] - turret_pos[0]) ** 2) + ((target_pos[1] - turret_pos[1]) **2)) ** .5
+    #target_range = (((target_pos[0] - turret_pos[0]) ** 2) + ((target_pos[1] - turret_pos[1]) **2)) ** .5
     target_range = Vector2((target_pos.x - turret_pos.x), (target_pos.y - turret_pos.y))
     # 0 - 4
     # k = .30 + target_range/275 # Original
@@ -93,6 +93,7 @@ def twr_func(coord, tag : str, LoT : list, fire : bool, current_dir : float, tar
     # k = .30 + target_range/275
     # print(f"k:{k}")
     # Needs: target_range, target_vel, bullet_speed, rot_speed
+
     a = Vector2.dot(target_vel, target_vel) - bullet_speed**2
     b = 2 * Vector2.dot(target_vel, target_range)
     c = Vector2.dot(target_range, target_range)
@@ -107,8 +108,8 @@ def twr_func(coord, tag : str, LoT : list, fire : bool, current_dir : float, tar
         deltaTime = -1
 
     aim_point = Vector2(target_pos - target_vel * deltaTime)
-    delta_x = turret_pos.x - aim_point.x # (target_pos.x + k*(target_vel.x))
-    delta_y = turret_pos.y - aim_point.y # (target_pos.y + k*(target_vel.y))
+    delta_x = turret_pos.x - aim_point.x #(target_pos.x + k*(target_vel.x))#aim_point.x # (target_pos.x + k*(target_vel.x))
+    delta_y = turret_pos.y - aim_point.y #(target_pos.y + k*(target_vel.y))#aim_point.y # (target_pos.y + k*(target_vel.y))
 
     # print(f"delta_x {delta_x}, delta_y{delta_y}")
 
