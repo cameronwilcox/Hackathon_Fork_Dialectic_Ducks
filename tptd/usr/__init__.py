@@ -63,7 +63,7 @@ def twr_func(coord, tag : str, LoT : list, fire : bool, current_dir : float, tar
 
     '''
     # Wait to start shooting until an enemy spawns (if 1 turret)
-    if len(LoT) > 10:
+    if len(LoT) > 2:
         priority_target = LoT[2]
     else:
         print("start")
