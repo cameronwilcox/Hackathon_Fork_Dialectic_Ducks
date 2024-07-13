@@ -63,11 +63,11 @@ def twr_func(coord, tag : str, LoT : list, fire : bool, current_dir : float, tar
 
     '''
     # Wait to start shooting until an enemy spawns (if 1 turret)
-    if len(LoT) > 3:
-        priority_target = LoT[1]
+    if len(LoT) > 10:
+        priority_target = LoT[2]
     else:
         print("start")
-        return (0, False, False)
+        return (90, False, False)
 
     # Target variables
     target_type = priority_target[0]
@@ -75,17 +75,37 @@ def twr_func(coord, tag : str, LoT : list, fire : bool, current_dir : float, tar
     target_vel = Vector2(priority_target[2][0], priority_target[2][1])
 
     # Turret variables
+    turret = LoT[0]
+    print(current_dir)
     turret_pos = Vector2(coord[0], coord[1])
+    bullet_speed = 45 # Hard coded from Howard Walowitz Turret
+    rot_speed = 55
+    # target_range = (((target_pos[0] - turret_pos[0]) ** 2) + ((target_pos[1] - turret_pos[1]) **2)) ** .5
+    target_range = Vector2((target_pos.x - turret_pos.x), (target_pos.y - turret_pos.y))
+    # 0 - 4
+    # k = .30 + target_range/275 # Original
+    # Add Bullet speed to calculation
+    # k = .30 + target_range/275
+    # print(f"k:{k}")
+    # Needs: target_range, target_vel, bullet_speed, rot_speed
+    a = Vector2.dot(target_vel, target_vel) - bullet_speed**2
+    b = 2 * Vector2.dot(target_vel, target_range)
+    c = Vector2.dot(target_range, target_range)
 
-    target_range = (((target_pos[0] - turret_pos[0]) ** 2) + ((target_pos[1] - turret_pos[1]) **2)) ** .5
+    disc = b*b - 4*a*c
 
-    k = .30 + target_range/275
-    print(f"k:{k}")
+    deltaTime = 0
 
-    delta_x = turret_pos.x - (target_pos.x + k*(target_vel.x))
-    delta_y = turret_pos.y - (target_pos.y + k*(target_vel.y))
+    if(disc > 0):
+        deltaTime = 2 * c / ((disc * 0.5) - b)
+    else:
+        deltaTime = -1
 
-    print(f"delta_x {delta_x}, delta_y{delta_y}")
+    aim_point = Vector2(target_pos - target_vel * deltaTime)
+    delta_x = turret_pos.x - aim_point.x # (target_pos.x + k*(target_vel.x))
+    delta_y = turret_pos.y - aim_point.y # (target_pos.y + k*(target_vel.y))
+
+    # print(f"delta_x {delta_x}, delta_y{delta_y}")
 
     if delta_x > 0:
         angle = math.degrees(math.atan(delta_y/delta_x)) + 180
