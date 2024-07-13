@@ -66,20 +66,19 @@ def twr_func(coord, tag : str, LoT : list, fire : bool, current_dir : float, tar
     print(priority_target[2])
     delta_x = coord[0] - (priority_target[1][0] + priority_target[2][0])
     delta_y = coord[1] - (priority_target[1][1] + priority_target[2][1])
+    if target_dir == 90 and current_dir == 90:
+        return (90, True, False)
+    elif target_dir == -90 and current_dir == -90:
+        return (-90, True, False)
     if priority_target[1][0] < coord[0]:
         angle = math.degrees(math.atan(delta_y/delta_x)) + 180
     elif priority_target[1][0] == coord[0]:
         if priority_target[1][1] > coord[1]:
-            return (270, False, False)
-        else:
             return (90, False, False)
+        else:
+            return (-90, False, False)
     else:
         angle = math.degrees(math.atan(delta_y/delta_x))
-    # angle = coord.angle_to(priority_target[1])
-    # if priority_target[1][0] < coord[0]:
-    #      angle = angle + 180
 
-    # angle = coord.angle_to(priority_target[1])
-    # print(angle)
     return (angle, True, False)
 #End-def
