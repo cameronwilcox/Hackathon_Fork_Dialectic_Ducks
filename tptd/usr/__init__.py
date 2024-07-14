@@ -14,11 +14,16 @@ with open(THIS_FOLDER / 'twr.csv', 'r') as twr_h:
     #End-for
 #End-with
 # <-- DO NOT EDIT
-
-
-min_range = 999
-max_range = -999
 from pygame.math import Vector2
+
+SEC_PER_UPDATE = (1000/120)/1000
+GAME_FT_PX = 1/4
+LUCKY_NUM = 777
+MAX_LEAD_MULT = 1.65
+ENEMY_LIST_HEAD_INDEX = len(TWR_POS) # Changes based on turret count
+SEEK_GENERIC_ENEMY_RANGE = 100
+SEEK_BEAST_RIDER_RANGE = 300
+
 def twr_func(coord, tag : str, LoT : list, fire : bool, current_dir : float, target_dir : float) -> Tuple[float, bool, bool]:
     '''
     Add in your turret logic here
@@ -62,65 +67,75 @@ def twr_func(coord, tag : str, LoT : list, fire : bool, current_dir : float, tar
         Indicates if the output target_dir is in radians
 
     '''
-    # Wait to start shooting until an enemy spawns (if 1 turret)
-    if len(LoT) > 2:
-        priority_target = LoT[2]
-        if tag == '3000':
-            for entity in LoT:
-                if entity[0] == 'Beast Rider':
-                    priority_target = entity
-                    break
-    else:
-        print("start")
+    # Base case: Turret idle until enemies spawn
+    if len(LoT) < ENEMY_LIST_HEAD_INDEX:
         return (90, False, False)
 
     # Target variables
-    target_type = priority_target[0]
+    priority_target = LoT[ENEMY_LIST_HEAD_INDEX]
+    target_pos = Vector2(priority_target[1][0], priority_target[1][1])
+    target_vel = Vector2(priority_target[2][0], priority_target[2][1])
+    
+    # Turret variables
+    turret_pos = Vector2(coord[0], coord[1])
+    dist_from_target = abs(turret_pos.distance_to(target_pos))
+    bullet_speed = 0
+    if tag == "3001":
+        bullet_speed = SEC_PER_UPDATE * 45 / GAME_FT_PX
+    if tag == "3000":
+        bullet_speed = SEC_PER_UPDATE * 70 / GAME_FT_PX
+
+    # Prioritization Algorithm
+    for entity in LoT[2:]:
+        if tag == "3000":
+            if entity[0] == "Beast Rider" and dist_from_target < SEEK_BEAST_RIDER_RANGE:
+                    priority_target = entity
+                    break
+        if(turret_pos.distance_to(Vector2(entity[1][0], entity[1][1])) < dist_from_target and dist_from_target < SEEK_GENERIC_ENEMY_RANGE):
+            if tag == "3001":
+                if entity[0] != "Beast Rider":
+                    priority_target = entity
+        else:
+            priority_target = LoT[2]
+        dist_from_target = abs(turret_pos.distance_to(entity[1]))
+
     target_pos = Vector2(priority_target[1][0], priority_target[1][1])
     target_vel = Vector2(priority_target[2][0], priority_target[2][1])
 
-    # Turret variables
-    turret = LoT[0]
-    print(current_dir)
-    turret_pos = Vector2(coord[0], coord[1])
-    bullet_speed = 45 # Hard coded from Howard Walowitz Turret
-    rot_speed = 55
-    #target_range = (((target_pos[0] - turret_pos[0]) ** 2) + ((target_pos[1] - turret_pos[1]) **2)) ** .5
+    # Aim variables
     target_range = Vector2((target_pos.x - turret_pos.x), (target_pos.y - turret_pos.y))
-    # 0 - 4
-    # k = .30 + target_range/275 # Original
-    # Add Bullet speed to calculation
-    # k = .30 + target_range/275
-    # print(f"k:{k}")
-    # Needs: target_range, target_vel, bullet_speed, rot_speed
+    deltaTime = calc_aim_point(target_range, target_vel, bullet_speed)
+    deltaTime_mult = lerp(0, MAX_LEAD_MULT, abs(target_range.magnitude()/LUCKY_NUM)) # Feeling lucky? 
+    aim_point = Vector2(target_pos - target_vel * deltaTime * deltaTime_mult)
 
-    a = Vector2.dot(target_vel, target_vel) - bullet_speed**2
-    b = 2 * Vector2.dot(target_vel, target_range)
-    c = Vector2.dot(target_range, target_range)
+    # Aim vector
+    aim = Vector2(turret_pos.x - aim_point.x, turret_pos.y - aim_point.y)
+
+    # Angle determination
+    if aim.x > 0:
+        angle = math.atan(aim.y/aim.x) + math.pi
+    elif aim.x == 0 and aim.y > 0:
+        return (90, True, False)
+    elif aim.x == 0 and aim.y < 0:
+        return (-90, True, False)
+    else:
+        angle = math.atan(aim.y/aim.x)
+
+    return (angle, True, True)
+#End-def
+
+# Aim Algorithm
+def calc_aim_point(rel_pos, rel_vel, bullet_speed):
+    a = Vector2.dot(rel_vel, rel_vel) - bullet_speed**2
+    b = 2 * Vector2.dot(rel_vel, rel_pos)
+    c = Vector2.dot(rel_pos, rel_pos)
 
     disc = b*b - 4*a*c
 
-    deltaTime = 0
-
     if(disc > 0):
-        deltaTime = 2 * c / ((disc * 0.5) - b)
+        return 2 * c / ((disc * 0.5) - b)
     else:
-        deltaTime = -1
-
-    aim_point = Vector2(target_pos - target_vel * deltaTime)
-    delta_x = turret_pos.x - aim_point.x #(target_pos.x + k*(target_vel.x))#aim_point.x # (target_pos.x + k*(target_vel.x))
-    delta_y = turret_pos.y - aim_point.y #(target_pos.y + k*(target_vel.y))#aim_point.y # (target_pos.y + k*(target_vel.y))
-
-    # print(f"delta_x {delta_x}, delta_y{delta_y}")
-
-    if delta_x > 0:
-        angle = math.degrees(math.atan(delta_y/delta_x)) + 180
-    elif delta_x == 0 and delta_y > 0:
-        return (90, True, False)
-    elif delta_x == 0 and delta_y < 0:
-        return (-90, True, False)
-    else:
-        angle = math.degrees(math.atan(delta_y/delta_x))
-
-    return (angle, True, False)
-#End-def
+        return -1
+# Helper Linear Interpolation function
+def lerp(start, end, t):
+    return start * (1 - t) + end * t
