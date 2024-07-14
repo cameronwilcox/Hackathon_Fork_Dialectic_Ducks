@@ -20,7 +20,7 @@ SEC_PER_UPDATE = (1000/120)/1000
 GAME_FT_PX = 1/4
 LUCKY_NUM = 777
 MAX_LEAD_MULT = 1.65
-ENEMY_LIST_HEAD_INDEX = len(TWR_POS) # Changes based on turret count
+ENEMY_LIST_HEAD_INDEX = 2 # Change based on turret count
 SEEK_GENERIC_ENEMY_RANGE = 100
 SEEK_BEAST_RIDER_RANGE = 300
 
@@ -68,7 +68,7 @@ def twr_func(coord, tag : str, LoT : list, fire : bool, current_dir : float, tar
 
     '''
     # Base case: Turret idle until enemies spawn
-    if len(LoT) < ENEMY_LIST_HEAD_INDEX:
+    if len(LoT) <= ENEMY_LIST_HEAD_INDEX:
         return (90, False, False)
 
     # Target variables
