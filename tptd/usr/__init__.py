@@ -102,9 +102,9 @@ def twr_func(coord, tag : str, LoT : list, fire : bool, current_dir : float, tar
     target_pos = Vector2(priority_target[1][0], priority_target[1][1])
     target_vel = Vector2(priority_target[2][0], priority_target[2][1])
 
-    # Aim variables
+    # Aim Algorithm
     target_range = Vector2((target_pos.x - turret_pos.x), (target_pos.y - turret_pos.y))
-    deltaTime = calc_aim_point(target_range, target_vel, bullet_speed)
+    deltaTime = calc_aim_delta(target_range, target_vel, bullet_speed)
     deltaTime_mult = lerp(0, MAX_LEAD_MULT, abs(target_range.magnitude()/LUCKY_NUM)) # Feeling lucky? 
     aim_point = Vector2(target_pos - target_vel * deltaTime * deltaTime_mult)
 
@@ -124,12 +124,11 @@ def twr_func(coord, tag : str, LoT : list, fire : bool, current_dir : float, tar
     return (angle, True, True)
 #End-def
 
-# Aim Algorithm
-def calc_aim_point(rel_pos, rel_vel, bullet_speed):
+# Aim delta calculation function
+def calc_aim_delta(rel_pos, rel_vel, bullet_speed):
     a = Vector2.dot(rel_vel, rel_vel) - bullet_speed**2
     b = 2 * Vector2.dot(rel_vel, rel_pos)
     c = Vector2.dot(rel_pos, rel_pos)
-
     disc = b*b - 4*a*c
 
     if(disc > 0):
