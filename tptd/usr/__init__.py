@@ -65,53 +65,57 @@ def twr_func(coord, tag : str, LoT : list, fire : bool, current_dir : float, tar
     # Wait to start shooting until an enemy spawns (if 1 turret)
     if len(LoT) > 2:
         priority_target = LoT[2]
-        if tag == '3000':
+        if tag == '3001':
             for entity in LoT:
                 if entity[0] == 'Beast Rider':
                     priority_target = entity
                     break
+                elif len(LoT) > 3:
+                    priority_target = LoT[3]
+
     else:
-        print("start")
         return (90, False, False)
 
     # Target variables
-    target_type = priority_target[0]
+    # target_type = priority_target[0]
     target_pos = Vector2(priority_target[1][0], priority_target[1][1])
-    target_vel = Vector2(priority_target[2][0], priority_target[2][1])
+    # target_vel = Vector2(priority_target[2][0], priority_target[2][1])
 
     # Turret variables
-    turret = LoT[0]
-    print(current_dir)
     turret_pos = Vector2(coord[0], coord[1])
-    bullet_speed = 45 # Hard coded from Howard Walowitz Turret
-    rot_speed = 55
-    #target_range = (((target_pos[0] - turret_pos[0]) ** 2) + ((target_pos[1] - turret_pos[1]) **2)) ** .5
-    target_range = Vector2((target_pos.x - turret_pos.x), (target_pos.y - turret_pos.y))
+    # bullet_speed = 45 # Hard coded from Howard Walowitz Turret
+    # rot_speed = 55
+    target_range = (((target_pos[0] - turret_pos[0]) ** 2) + ((target_pos[1] - turret_pos[1]) **2)) ** .5
+    # target_range = Vector2((target_pos.x - turret_pos.x), (target_pos.y - turret_pos.y))
     # 0 - 4
-    # k = .30 + target_range/275 # Original
+    k = 0
+    if tag == "3001":
+        k = 0.07 # Original
+    elif tag == "3000":
+        k = .22 + target_range/315
     # Add Bullet speed to calculation
     # k = .30 + target_range/275
     # print(f"k:{k}")
     # Needs: target_range, target_vel, bullet_speed, rot_speed
 
-    a = Vector2.dot(target_vel, target_vel) - bullet_speed**2
-    b = 2 * Vector2.dot(target_vel, target_range)
-    c = Vector2.dot(target_range, target_range)
+    # a = Vector2.dot(target_vel, target_vel) - bullet_speed**2
+    # b = 2 * Vector2.dot(target_vel, target_range)
+    # c = Vector2.dot(target_range, target_range)
 
-    disc = b*b - 4*a*c
+    # disc = b*b - 4*a*c
 
-    deltaTime = 0
+    # deltaTime = 0
 
-    if(disc > 0):
-        deltaTime = 2 * c / ((disc * 0.5) - b)
-    else:
-        deltaTime = -1
+    # if(disc > 0):
+    #     deltaTime = 2 * c / ((disc * 0.5) - b)
+    # else:
+    #     deltaTime = -1
 
-    aim_point = Vector2(target_pos - target_vel * deltaTime)
-    delta_x = turret_pos.x - aim_point.x #(target_pos.x + k*(target_vel.x))#aim_point.x # (target_pos.x + k*(target_vel.x))
-    delta_y = turret_pos.y - aim_point.y #(target_pos.y + k*(target_vel.y))#aim_point.y # (target_pos.y + k*(target_vel.y))
-
-    # print(f"delta_x {delta_x}, delta_y{delta_y}")
+    # aim_point = Vector2(target_pos - target_vel * deltaTime)
+    # delta_x = turret_pos.x - aim_point.x #(target_pos.x + k*(target_vel.x))#aim_point.x # (target_pos.x + k*(target_vel.x))
+    # delta_y = turret_pos.y - aim_point.y #(target_pos.y + k*(target_vel.y))#aim_point.y # (target_pos.y + k*(target_vel.y))
+    delta_x = turret_pos.x - (target_pos.x + k*(priority_target[2][0]))
+    delta_y = turret_pos.y - (target_pos.y + k*(priority_target[2][1]))
 
     if delta_x > 0:
         angle = math.degrees(math.atan(delta_y/delta_x)) + 180
